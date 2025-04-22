@@ -1,5 +1,37 @@
 from math import *
 from scipy.stats import norm
+import yfinance as yf
+
+def get_spot_price(asset):
+    ticker = yf.Ticker(asset)
+    return ticker.history(period="1d")["Close"].iloc[-1]
+
+def get_calls_put(asset):
+
+    ticker = yf.Ticker(asset)
+
+    spot_price = ticker.history(period="1d")["Close"].iloc[-1]
+
+    # first expiration date
+    expiration = ticker.options[0]
+
+    options_chain = ticker.option_chain(expiration)
+
+    # retrieve les calls et puts
+    calls = options_chain.calls
+    puts = options_chain.puts
+
+    # Affiche les 5 premiers calls
+    print("\nExtraits des options Call :")
+    print(calls.head())
+
+    # Même chose pour les puts
+    print("\nExtraits des options Put :")
+    print(puts.head())
+
+
+
+
 
 def price_black_ascholes_merton(s, k, t, r, sigma, option_type="call"):
     price = 0
@@ -50,4 +82,11 @@ print("--- put ---")
 for greek, value in put.items():
     print(f"{greek.capitalize()} : {value:.4f}")
 
+print("--- Spot of AAPL ---")
+call_aapl = price_black_ascholes_merton(get_spot_price("TTE"),k,t,r,sigma,"call")
+for greek, value in call_aapl.items():
+    print(f"{greek.capitalize()} : {value:.4f}")
     
+get_calls_put("AAPL")
+
+print(get_spot_price("GLE"))
